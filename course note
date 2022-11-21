@@ -510,3 +510,34 @@ https://create-react-app.dev/docs/getting-started/
     cd my-app
     npm start
 
+-- in src folder, create a file called index.js & App.jsx
+
+-- Define Apps components in App.jsx
+    import React from 'react';
+    import ReactDOM from 'react-dom/client'; <---- This is different than the video 
+    import App from './App';
+    import React from 'react';
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+
+-- Add bootstrap in index.html
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" re
+
+
+-- Get fontawesome, got to cdnjs
+
+https://cdnjs.com/libraries/font-awesome
+
+add this to index.html
+<link rel="stylesheet" href="style.css">
+changes to 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+
+
+
+--- **** React Router Setup  **** ---
