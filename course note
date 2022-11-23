@@ -255,6 +255,8 @@ app.get("/getRestaurants", (req, res) => {
     -- import morgan and use the middleware
     const morgan = require('morgan');
 const { reactive } = require("vue")
+const { default: AddRestaurant } = require("./yelp/client/my-app/src/components/AddRestaurant")
+const { default: RestaurantList } = require("./yelp/client/my-app/src/components/RestaurantList")
     
     app.use(morgan("tiny"));
 
@@ -541,3 +543,190 @@ changes to
 
 
 --- **** React Router Setup  **** ---
+    npm install react-router-dom, not react-router, two separate typeof
+
+    -- create a new folder to hold all of route --
+    -- import { BrowserRouter as Router, Route, Routes } from 'react-router-dom' --
+    -- n V6, you can't use the component prop anymore. It was replaced in favor of element: ---
+
+    const App = () => {
+        return <div>
+            <Router>
+                <Routes>
+                    <Route exact path="/" element={<Home/>} />
+                    <Route exact path = "/restaurants/:id/update" element = {<UpdatePage/>} />
+                    <Route exact path = "/restaurants/:id" element = {<RestaurantDetailPage/>} />
+                </Routes>
+            </Router>
+        </div>;
+    };
+
+
+--- **** HomePage Layout  **** ---
+    -- create a components folder --
+
+
+    <form action="">
+                <div className="form-row">
+                    <div className="col">
+                        <input type="text" className="form-control" placeholder="Name"/>
+                    </div>
+                    <div className="col">
+                        <input type="text" className="form-control" placeholder="Location"/>
+                    </div>
+                    <div className="col">
+                        <select className="custom-select">
+                            <option disabled>Price Range</option>
+                            <option value="1">$</option>
+                            <option value="2">$$</option>
+                            <option value="3">$$$</option>
+                            <option value="4">$$$$</option>
+                            <option value="5">$$$$$</option>
+                        </select>
+                    </div>
+                    <button className="btn btn-primary">Add</button>
+                </div>      
+    </form>
+
+
+--- **** Context API  **** ---
+    -- Find a place to store the result. Benefit about context API, all components can retrieve the data
+    -- In src, create a new folder called
+
+    -- Warp all App component in our context API
+
+
+
+--- **** Fetching Data  **** ---
+    -- install axios --
+    npm install axios
+    -- create a new folder called apis, defined api here
+    
+
+    import axios from "axios";
+
+    export default axios.create({
+        baseURL: "http://localhost:8080/api/v1/restaurants",
+    })
+
+    -- In RestaurantList.jsx
+
+    useEffect(() => {
+        
+        try {
+            RestaurantFinder.get("/")
+        } catch (err) {
+
+        }
+    },[]); 
+
+    -- import React, {useEffect} from 'react'
+
+
+    -- in server folder, server.js file add
+        const cors = require("cors");
+        app.use(cors());
+        npm install cors
+
+        useEffect(() => {
+        /* define something */
+        const fetchData = async () => {
+        try {
+            const response = await RestaurantFinder.get("/")
+            console.log(response)
+            } catch (err) {}
+        }; 
+        /* called it as function */
+        fetchData();
+        },[]);
+        
+    -- saved the it context api, stored in RestaurantContext.js
+    -- use useContext and then be able to do it.
+
+
+--- **** Rendering Restaurants  **** ---
+
+{/* if restaurants is undefined, then not run */}
+{restaurants && 
+    restaurants.map(restaurant => {
+    return (
+        <tr key={restaurant.id}>
+        <td>{restaurant.name}</td>
+        <td>{restaurant.location}</td>
+        <td>{"$".repeat(restaurant.price_range)}</td>
+        <td>reviews</td>
+        <td><button className="btn btn-warning">Update</button></td>
+        <td><button className="btn btn-danger">Delete</button></td>
+    </tr>
+    )
+})}
+
+
+--- **** Adding Restaurants  **** ---
+To make it controllable, react control all the state
+Use useState("") in AddRestaurant.jsx
+
+    const [name, setName] = useState("")
+    const [location, setLocation] = useState("")
+    const [price, setPriceRange] = useState("")
+
+    -- To make it controllable input
+     {/* e: event  */}
+     <input value={name} onChange={e => setName(e.target.value)} type="text" className="form-control" placeholder="Name"/>
+
+
+     --
+
+     import RestaurantFinder from "../apis/RestaurantFinder";
+
+
+     -- Once it upload the new item, it need to refresh the UI
+     -- go to context api, define the function for adding the restaurant
+
+    const addRestaurants = (restaurant) => {
+        setRestaurants([...setRestaurants, restaurant]);
+    }
+    return ( 
+        <RestaurantsContext.Provider value ={{restaurants, setRestaurants, addRestaurants}}>
+            {props.children}
+        </RestaurantsContext.Provider>
+    )
+
+    const { addRestaurants } = useContext(RestaurantsContext);
+    addRestaurants(response.data.data.restaurant)
+
+
+--- **** Deleting Restaurants  **** ---
+
+    {/* Pass error function to event handler, pass a reference to function, not function itself */}
+    <td><button onClick={() => handleDelete(restaurant.id)} className="btn btn-danger">Delete</button></td>
+    
+    const handleDelete = async (id) => {
+        try {
+            const response = await RestaurantFinder.delete(`/${id}`);
+            console.log(response);
+            setRestaurants(restaurants.filter(restaurant => {
+                return restaurant.id !==id
+            }))
+        } catch (err) {}
+    };
+
+--- **** Updating Restaurants  **** ---
+ -- set up the routing first --
+
+    /* In react-router-dom v6 useHistory() is replaced by useNavigate(). */
+    import { useNavigate } from 'react-router-dom';
+
+    // use useNavigate api //
+    let navigate = useNavigate();
+
+    const handleUpdate = (id) => {
+        navigate(`/restaurants/${id}/update`)
+    };
+
+    -- styling updating page
+    -- use useNavigate api, when user update the page, take it back to / --
+
+
+
+--- **** Detail Page  **** ---
