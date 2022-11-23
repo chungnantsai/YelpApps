@@ -1,0 +1,732 @@
+-- list databse 
+\l
+
+-- create database  
+CREATE DATABASE practice; 
+
+-- connect database 
+\c database
+
+-- list all table 
+\dt
+
+-- create table 
+
+CREATE TABLE products(
+    id INT,
+    name VARCHAR(50),
+    price INT,
+    on_sale boolean
+);
+
+-- check table 
+\d table
+
+-- modify table 
+ALTER TABLE products ADD COLUMN featured boolean;
+
+-- drop column
+ALTER TABLE products DROP COLUMN featured;
+
+-- drop table
+DROP TABLE products;
+
+-- drop database
+DROP DATABASE practice;
+
+-- Yelp DATABASE
+CREATE DATABASE yelp;
+
+
+CREATE TABLE restaurants(
+    id BIGSERIAL,
+    name VARCHAR(50),
+    location VARCHAR(50),
+    price_range INT,
+);
+
+-- Add test data: 
+INSERT INTO restaurants (id, name, location, price_range) values (123, 'macdonalds', 'new yorks', 3); 
+INSERT INTO restaurants (id, name, location, price_range) values (124, 'pizza hut', 'vegas', 2); 
+INSERT INTO restaurants (price_range) values (12); 
+
+
+-- After ADD NOT NULL constraints
+INSERT INTO restaurants (name, location, price_range) values ('wendys', 'denver', 1); 
+
+-- Check insert data:
+SELECT * FROM restaurants;
+
+
+-- Add constraints: NOT NULL and check(price_range >= 1 and price_range <=5)
+
+CREATE TABLE restaurants(
+    id BIGSERIAL NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    location VARCHAR(50) NOT NULL,
+    price_range INT NOT NULL check(price_range >= 1 and price_range <=5)
+);
+
+
+-- \dt restaurants;
+
+                                      Table "public.restaurants"
+   Column    |         Type          | Collation | Nullable |                 Default                 
+-------------+-----------------------+-----------+----------+-----------------------------------------
+ id          | bigint                |           | not null | nextval('restaurants_id_seq'::regclass)
+ name        | character varying(50) |           | not null | 
+ location    | character varying(50) |           | not null | 
+ price_range | integer               |           | not null | 
+Check constraints:
+    "restaurants_price_range_check" CHECK (price_range >= 1 AND price_range <= 5)
+
+
+-- Add primary key  
+
+CREATE TABLE restaurants(
+    id BIGSERIAL NOT NULL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    location VARCHAR(50) NOT NULL,
+    price_range INT NOT NULL check(price_range >= 1 and price_range <=5)
+);
+
+
+yelp=# \dt
+                                      Table "public.restaurants"
+   Column    |         Type          | Collation | Nullable |                 Default                 
+-------------+-----------------------+-----------+----------+-----------------------------------------
+ id          | bigint                |           | not null | nextval('restaurants_id_seq'::regclass)
+ name        | character varying(50) |           | not null | 
+ location    | character varying(50) |           | not null | 
+ price_range | integer               |           | not null | 
+Indexes:
+    "restaurants_pkey" PRIMARY KEY, btree (id)
+Check constraints:
+    "restaurants_price_range_check" CHECK (price_range >= 1 AND price_range <= 5)
+
+
+--- **** folder structure is shown as below: **** ---
+--- yelp folder 
+ |---- server folder
+ |---- client folder
+
+-- under server folder: 
+   npm init -y
+-- You will see package.json file
+-- install experess then:
+   npm install express
+-- it creates package-lock.json and node_modules folder
+
+
+--- **** Express Setup **** ---
+-- create server.js file (entry point for backend)
+        const express = require("express")
+
+
+        /* create an instance "express" and store in const "app" */
+        const app = express()
+
+        /* tell express to listen a specific port */
+        const port = 8080
+        app.listen(port, () => {
+            console.log(`server is up and listening: ${port}!`)
+        });
+
+
+--- ****  Environment Variables **** ---
+-- go to https://www.npmjs.com/
+-- install dotenv
+    npm install dotenv --save
+
+-- import into server.js
+    require('dotenv').config()
+
+-- create .env file to store all env variables
+
+    const port = process.env.PORT || 8080;
+    app.listen(port, () => {
+        console.log(`server is up and listening: ${port}!`)
+    });
+
+--- **** First Express Route **** ---
+
+--  No need to stop and restart server */ install nodemon package
+         npm install nodemon
+
+-- in package.json file modify the dependencies
+    "scripts": {
+        "start": "nodemon server.js"
+    },
+
+-- now when start the server, not use node server.js, but use the command below
+    npm start
+
+-- if you open browswer http://localhost:8080/getRestaurants, terminal will display below message.
+    [nodemon] starting `node server.js`
+    server is up and listening: 8080!
+    get all restaurants
+
+-- Add res.send, the message will display on website
+    app.get("/getRestaurants", (req, res) => {
+        res.send("these are restaurants")
+    }) 
+
+-- send it back to JSON object
+    app.get("/getRestaurants", (req, res) => {
+        res.json({
+            status: "success",
+            restaurant: "mcdonals"
+        })
+    }) 
+
+-- Use Postman to test get request
+-- You can setup the status code by using .status()
+app.get("/getRestaurants", (req, res) => {
+    res.status(404).json({
+        status: "success",
+        restaurant: "mcdonals"
+    })
+}) 
+
+
+--- **** Configure all routes **** ---
+
+    -- // Get All Restaurants // ---
+    app.get("/api/v1/restaurants", (req, res) => {
+        res.status(200).json({
+            status: "success",
+            data: {
+                restaurant: ["mcdonals", "wendys"],
+            },
+        })
+    });
+   
+    -- // Get a Restaurants // ---
+    app.get("/api/v1/restaurants:id", (req, res) => {
+        console.log(req.params);
+    });
+
+    -- Use Postman to send the request 
+    http://localhost:8080/api/v1/restaurants:1212
+
+    // We will know which id user wants to retrieve
+    [nodemon] starting `node server.js`
+    server is up and listening: 8080!
+    { id: ':0316' }
+    { id: ':1212' }
+
+
+    -- // Create a Restaurants // ---
+      -- Use Postman to send the POST request, Body column -> raw -> JSON format
+    {
+        "name": "taco bell",
+        "location": "New York",
+        "price_range": 4
+    }
+    
+    
+    // Get a Restaurant //
+    app.get("/api/v1/restaurants:id", (req, res) => {
+        console.log(req.params);
+    });
+
+
+--- **** Express Middleware **** ---
+    /* define Express Middleware */
+    -- // Add a new arugment "next"
+    -- // middleware has to talk explicilty to the next middleware/route handler
+    app.use((req, res, next) => {
+        console.log("yeah our middleware");
+        next();
+    })
+
+    -- The plcace where you put your middleware is important (red from the top down). 
+    -- You can add as many middleware as you want
+    -- Middle can also send the response to the user.
+    app.use((req, res, next) => {
+    res.status(404).json({
+        stauts: "fail",
+        });
+    });
+
+    -- install npm package morgan
+    npm i morgan
+
+    -- import morgan and use the middleware
+    const morgan = require('morgan');
+const { reactive } = require("vue")
+const { default: AddRestaurant } = require("./yelp/client/my-app/src/components/AddRestaurant")
+const { default: RestaurantList } = require("./yelp/client/my-app/src/components/RestaurantList")
+    
+    app.use(morgan("tiny"));
+
+    -- use Postman to send GET request
+    -- in terminal, morgan send the feedback
+    GET /api/v1/restaurants 200 64 - 2.470 ms
+
+    -- or you can use dev. just color coded.
+    app.use(morgan("dev"));
+    GET /api/v1/restaurants 200 4.125 ms - 64
+
+
+--- **** Finishing up Routes **** ---
+-- add this middleware
+app.use(express.json());
+
+    server is up and listening: 8080!
+    { name: 'taco bell', location: 'New York', price_range: 4 }
+
+   -- Put request need to update all the fields.
+   -- Use Postman PUT request, http://localhost:8080/api/v1/restaurants/:1234
+
+    {
+        "name": "taco bell",
+        "location": "New York",
+        "price_range": 4
+    }
+
+
+    app.put("/api/v1/restaurants/:id", (req, res) => {
+        console.log(req.params.id);
+        console.log(req.body);
+    });
+
+    -- response --
+    server is up and listening: 8080!
+    { id: ':1234' }
+    { name: 'taco bell', location: 'New York', price_range: 4 }
+
+
+--- **** Connect to Postgres **** ---
+-- install node-postgres  from https://node-postgres.com/
+    npm i pg
+
+    -- in server folder, create a new folder called db
+    -- in db, create a file called index.js
+    -- insert the script from https://www.youtube.com/watch?v=J01rYl9T3BU
+    const { Pool } = require('pg')
+
+    const pool = new Pool({
+        user: 'postgres',
+        host: 'localhost',
+        database: 'yelp',
+        password: 'password',
+        port: 5432,
+    });
+    module.exports = {
+    query: (text, params, callback) => {
+        return pool.query(text, params, callback)
+    },
+    };
+
+    -- Go to server .js and import it
+
+
+    -- This only return promise --
+    -- When dealing with promise, we prefer to use await/async 
+    db.query("select * from restaurants")
+
+    app.get("/api/v1/restaurants", async (req, res) => {
+
+        const results = await db.query("select * from restaurants")
+        console.log("results");
+        res.status(200).json({
+            status: "success",
+            data: {
+                restaurant: ["mcdonlads", "wendys"],
+            },
+        })
+    });
+
+    -- Success! The result is returned in terminal ---
+    server is up and listening: 8080!
+    Result {
+    command: 'SELECT',
+    rowCount: 1,
+    oid: null,    
+    rows: [ { id: '1', name: 'wendys', location: 'denver', price_range: 1 } ],
+
+
+    -- In order to NOT hard-coded in db/index.js, add env variable in .env file
+    PGUSER=postgres
+    PGHOST=localhost
+    PGPASSWORD=passw0rd
+    PGDATABASE=yelp
+    PGPORT=5432
+
+    -- modfiy the index.js to the below.
+    const pool = new Pool({
+    user: process.env.PGUSER,
+    host: process.env.PGHOST,
+    database: process.env.PGPASSWORD,
+    password: process.env.PGDATABASE,
+    port: process.env.PGPORT,
+    });
+
+    -- OR just remove all of them, pg knows to look into Pool()
+    const pool = new Pool({});
+
+
+--- **** Get all Restaurants Route  **** ---
+
+wrap async/await into try {} catch (err) block
+
+app.get("/api/v1/restaurants", async (req, res) => {
+    try {
+        const results = await db.query("select * from restaurants");
+        console.log(results);
+        res.status(200).json({
+            status: "success",
+            results: results.rows.length,
+            data: {
+                restaurant: results.rows,
+            },
+        });
+    } catch (err) {
+        console.log(err)
+    }
+});
+
+
+--- **** Get ONE Restaurant Route **** ---
+
+    console.log(req.params.id) <--- get id 
+
+    -- In JavaScript, you can do ``
+    const results = await db.query(`select * from restaurants where id = ${req.params.id}`);
+
+
+    app.get("/api/v1/restaurants/:id", async (req, res) => {
+        console.log(req.params.id);
+        try {
+            const results = await db.query(
+                `select * from restaurants where id = ${req.params.id}`
+            );
+            console.log(results.rows[0]);
+            res.status(200).json({
+                status: "success",
+                data: {
+                    restaurant: results.rows[0],
+                },
+            });
+        } catch (err) {
+            console.log(err)
+        }
+    });
+
+
+    // A Better way to write the query.    https://node-postgres.com/features/queries
+    // Take the 2nd arug and pass to $1, it looks like select * from restaurant where id = req.params.id
+    const results = await db.query("select * from restaurant where id = $1", [req.params.id]);
+    // $1 takes 1 argu, $2 takes 2 argu
+    const results = await db.query("select $2 from restaurants where id = $1", [req.params.id, 'name']);
+
+
+--- **** Create A Restaurant Route **** ---
+
+// To make postgreSQL to output the data you just input
+yelp=# INSERT INTO restaurants (name, location, price_range) values ('cheesecake factory', 'dallas', 2);
+INSERT 0 1 <----no return data
+
+
+// This is how you returning the stuff. 
+yelp=# INSERT INTO restaurants (name, location, price_range) values ('cheesecake factory', 'dallas', 2) returning *;
+ id |        name        | location | price_range 
+----+--------------------+----------+-------------
+  5 | cheesecake factory | dallas   |           2
+(1 row)
+
+INSERT 0 1
+
+// only returning id 
+yelp=# INSERT INTO restaurants (name, location, price_range) values ('cheesecake factory', 'Fremont', 2) returning id;
+ id 
+----
+  6
+(1 row)
+
+
+// Create a Restaurant //
+app.post("/api/v1/restaurants", async (req, res) => {
+    console.log(req.body);
+    try {
+        const results = await db.query("INSERT INTO restaurants (name, location, price_range) values ($1, $2, $3) returning *", 
+        [req.body.name, req.body.location, req.body.price_range]);
+        console.log(results)
+        res.status(201).json({
+            status: "success",
+            data: {
+                restaurant: results.rows[0],
+            },
+        });
+    } catch (err) {
+        console.log(err);
+    }
+
+});
+
+
+--- **** Update A Restaurant Route **** ---
+
+app.put("/api/v1/restaurants/:id", async (req, res) => {
+    try {
+        // All the values, client send will be within the body
+        const results = await db.query("UPDATE restaurants SET name = $1, location = $2,  price_range = $3 where id = $4 returning *", 
+        [req.body.name, req.body.location, req.body.price_range, req.params.id]) 
+        res.status(200).json({
+            status: "success",
+            data: {
+                restaurant: results.rows[0],
+            },
+        })
+        console.log(results)
+    } catch (err) {
+        console.log(err);
+    }
+    console.log(req.params);
+    console.log(req.body);
+});
+
+
+--- **** Delete A Restaurant Route API **** ---
+app.delete("/api/v1/restaurants/:id", async (req, res) => {
+    try {
+        const results = await db.query("DELETE FROM restaurants WHERE id = $1", [req.params.id]) 
+        console.log(results)
+        res.status(204).json({
+            status: "success"
+        });
+    } catch (err) {
+        console.log(err);
+    }
+});
+
+
+
+
+--- **** React Setup  **** ---
+-- install React
+https://create-react-app.dev/docs/getting-started/
+
+    npx create-react-app my-app
+    cd my-app
+    npm start
+
+-- in src folder, create a file called index.js & App.jsx
+
+-- Define Apps components in App.jsx
+    import React from 'react';
+    import ReactDOM from 'react-dom/client'; <---- This is different than the video 
+    import App from './App';
+    import React from 'react';
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+
+-- Add bootstrap in index.html
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" re
+
+
+-- Get fontawesome, got to cdnjs
+
+https://cdnjs.com/libraries/font-awesome
+
+add this to index.html
+<link rel="stylesheet" href="style.css">
+changes to 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+
+
+
+--- **** React Router Setup  **** ---
+    npm install react-router-dom, not react-router, two separate typeof
+
+    -- create a new folder to hold all of route --
+    -- import { BrowserRouter as Router, Route, Routes } from 'react-router-dom' --
+    -- n V6, you can't use the component prop anymore. It was replaced in favor of element: ---
+
+    const App = () => {
+        return <div>
+            <Router>
+                <Routes>
+                    <Route exact path="/" element={<Home/>} />
+                    <Route exact path = "/restaurants/:id/update" element = {<UpdatePage/>} />
+                    <Route exact path = "/restaurants/:id" element = {<RestaurantDetailPage/>} />
+                </Routes>
+            </Router>
+        </div>;
+    };
+
+
+--- **** HomePage Layout  **** ---
+    -- create a components folder --
+
+
+    <form action="">
+                <div className="form-row">
+                    <div className="col">
+                        <input type="text" className="form-control" placeholder="Name"/>
+                    </div>
+                    <div className="col">
+                        <input type="text" className="form-control" placeholder="Location"/>
+                    </div>
+                    <div className="col">
+                        <select className="custom-select">
+                            <option disabled>Price Range</option>
+                            <option value="1">$</option>
+                            <option value="2">$$</option>
+                            <option value="3">$$$</option>
+                            <option value="4">$$$$</option>
+                            <option value="5">$$$$$</option>
+                        </select>
+                    </div>
+                    <button className="btn btn-primary">Add</button>
+                </div>      
+    </form>
+
+
+--- **** Context API  **** ---
+    -- Find a place to store the result. Benefit about context API, all components can retrieve the data
+    -- In src, create a new folder called
+
+    -- Warp all App component in our context API
+
+
+
+--- **** Fetching Data  **** ---
+    -- install axios --
+    npm install axios
+    -- create a new folder called apis, defined api here
+    
+
+    import axios from "axios";
+
+    export default axios.create({
+        baseURL: "http://localhost:8080/api/v1/restaurants",
+    })
+
+    -- In RestaurantList.jsx
+
+    useEffect(() => {
+        
+        try {
+            RestaurantFinder.get("/")
+        } catch (err) {
+
+        }
+    },[]); 
+
+    -- import React, {useEffect} from 'react'
+
+
+    -- in server folder, server.js file add
+        const cors = require("cors");
+        app.use(cors());
+        npm install cors
+
+        useEffect(() => {
+        /* define something */
+        const fetchData = async () => {
+        try {
+            const response = await RestaurantFinder.get("/")
+            console.log(response)
+            } catch (err) {}
+        }; 
+        /* called it as function */
+        fetchData();
+        },[]);
+        
+    -- saved the it context api, stored in RestaurantContext.js
+    -- use useContext and then be able to do it.
+
+
+--- **** Rendering Restaurants  **** ---
+
+{/* if restaurants is undefined, then not run */}
+{restaurants && 
+    restaurants.map(restaurant => {
+    return (
+        <tr key={restaurant.id}>
+        <td>{restaurant.name}</td>
+        <td>{restaurant.location}</td>
+        <td>{"$".repeat(restaurant.price_range)}</td>
+        <td>reviews</td>
+        <td><button className="btn btn-warning">Update</button></td>
+        <td><button className="btn btn-danger">Delete</button></td>
+    </tr>
+    )
+})}
+
+
+--- **** Adding Restaurants  **** ---
+To make it controllable, react control all the state
+Use useState("") in AddRestaurant.jsx
+
+    const [name, setName] = useState("")
+    const [location, setLocation] = useState("")
+    const [price, setPriceRange] = useState("")
+
+    -- To make it controllable input
+     {/* e: event  */}
+     <input value={name} onChange={e => setName(e.target.value)} type="text" className="form-control" placeholder="Name"/>
+
+
+     --
+
+     import RestaurantFinder from "../apis/RestaurantFinder";
+
+
+     -- Once it upload the new item, it need to refresh the UI
+     -- go to context api, define the function for adding the restaurant
+
+    const addRestaurants = (restaurant) => {
+        setRestaurants([...setRestaurants, restaurant]);
+    }
+    return ( 
+        <RestaurantsContext.Provider value ={{restaurants, setRestaurants, addRestaurants}}>
+            {props.children}
+        </RestaurantsContext.Provider>
+    )
+
+    const { addRestaurants } = useContext(RestaurantsContext);
+    addRestaurants(response.data.data.restaurant)
+
+
+--- **** Deleting Restaurants  **** ---
+
+    {/* Pass error function to event handler, pass a reference to function, not function itself */}
+    <td><button onClick={() => handleDelete(restaurant.id)} className="btn btn-danger">Delete</button></td>
+    
+    const handleDelete = async (id) => {
+        try {
+            const response = await RestaurantFinder.delete(`/${id}`);
+            console.log(response);
+            setRestaurants(restaurants.filter(restaurant => {
+                return restaurant.id !==id
+            }))
+        } catch (err) {}
+    };
+
+--- **** Updating Restaurants  **** ---
+ -- set up the routing first --
+
+    /* In react-router-dom v6 useHistory() is replaced by useNavigate(). */
+    import { useNavigate } from 'react-router-dom';
+
+    // use useNavigate api //
+    let navigate = useNavigate();
+
+    const handleUpdate = (id) => {
+        navigate(`/restaurants/${id}/update`)
+    };
+
+    -- styling updating page
+    -- use useNavigate api, when user update the page, take it back to / --
+
+
+
+--- **** Detail Page  **** ---
